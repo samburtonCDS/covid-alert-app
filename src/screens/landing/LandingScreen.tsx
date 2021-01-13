@@ -5,11 +5,30 @@ import {Box, Button, Icon} from 'components';
 import {useI18n} from 'locale';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {Metric} from 'services/MetricsService/Metric';
+import {DefaultMetricsService} from 'services/MetricsService/MetricsService';
+import {DefaultMetricsJsonSerializer} from 'services/MetricsService/MetricsJsonSerializer';
 
 export const LandingScreen = () => {
   const i18n = useI18n();
   const navigation = useNavigation();
   const {setLocale} = useStorage();
+
+  // TEST CODE; WILL REMOVE
+  function createFirstMetric(): Metric {
+    return new Metric(new Date().getTime(), `${Metric.name}`, 'QC', [['isItTrue', 'true']]);
+  }
+  function createSecondMetric(): Metric {
+    return new Metric(new Date().getTime(), `${Metric.name}`, 'ON', [
+      ['isHeRight', 'false'],
+      ['howMuchTime', '15 minutes'],
+    ]);
+  }
+  const metricsJsonSerializer = new DefaultMetricsJsonSerializer('0.0.7', 'WindowsPhone');
+  const metricsService = DefaultMetricsService.initialize(metricsJsonSerializer);
+  metricsService.publishMetric(createFirstMetric());
+  metricsService.publishMetrics([createSecondMetric(), createFirstMetric()]);
+  metricsService.sendMetrics();
 
   const isENFrameworkSupported = async () => {
     if (Platform.OS === 'ios') {
